@@ -1,0 +1,94 @@
+.root{
+  height:100vh;
+  display:grid;
+  grid-template-columns: 260px 1fr;
+  background:var(--background);
+  color:var(--foreground);
+}
+
+.sidebar{
+  background:var(--secondary-navy);
+  border-right:1px solid var(--border);
+  padding:14px 12px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 10px 14px;
+}
+
+.brandMark{
+  width:34px;
+  height:34px;
+  border-radius:10px;
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+}
+
+.brandText{min-width:0}
+.brandName{font-weight:700; font-size:14px; letter-spacing:.2px}
+.brandTagline{font-size:11px; opacity:.7; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+.nav{padding:6px 6px}
+.navSectionLabel{font-size:11px; opacity:.55; padding:12px 8px 8px}
+
+.navItem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 10px;
+  border-radius:10px;
+  color:color-mix(in srgb, var(--foreground) 85%, transparent);
+  text-decoration:none;
+  transition:background .15s ease, color .15s ease;
+}
+.navItem:hover{background:color-mix(in srgb, var(--foreground) 7%, transparent); color:var(--foreground)}
+.navItemActive{background:color-mix(in srgb, var(--secondary) 18%, transparent); color:var(--foreground)}
+
+.main{
+  display:grid;
+  grid-template-rows: 56px 1fr;
+  min-width:0;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border);
+  background:color-mix(in srgb, var(--background) 90%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.searchWrap{flex:1; max-width:560px}
+.search{
+  width:100%;
+  height:36px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:color-mix(in srgb, var(--card) 70%, transparent);
+  color:var(--foreground);
+  padding:0 12px;
+  outline:none;
+}
+.search:focus{border-color:color-mix(in srgb, var(--ring) 75%, transparent)}
+
+.topbarRight{display:flex; align-items:center; gap:10px}
+.primaryButton{
+  height:36px;
+  padding:0 12px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:color-mix(in srgb, var(--secondary) 18%, transparent);
+  color:var(--foreground);
+  font-weight:600;
+}
+.primaryButton:hover{background:color-mix(in srgb, var(--secondary) 26%, transparent)}
+
+.content{
+  min-width:0;
+  padding:18px 18px 22px;
+}
+
