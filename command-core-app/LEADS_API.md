@@ -4,25 +4,25 @@ Command Core exposes `POST /api/leads` for the [Digital Weave contact form](http
 
 Production base URL: `https://core.digitalweave.tech`
 
-## 1. Supabase setup
+## 1. Vercel KV storage (required)
 
-1. Create a Supabase project at [supabase.com](https://supabase.com).
-2. Run the migration in `supabase/migrations/20250613000000_create_leads.sql` (SQL Editor or Supabase CLI).
-3. Copy **Project URL** and **service role key** (Settings → API).
+Leads are stored in **Vercel KV** (Upstash Redis).
+
+1. Open the Command Core project in [Vercel Dashboard](https://vercel.com/dashboard).
+2. Go to **Storage** → **Create Database** → choose **KV** or **Upstash Redis**.
+3. Link it to the Command Core project.
+4. Vercel will auto-set `KV_REST_API_URL` and `KV_REST_API_TOKEN`.
+
+Redeploy after linking storage.
 
 ## 2. Vercel environment variables
 
-Set these on the Command Core Vercel project:
-
-| Variable | Where used | Notes |
-|----------|------------|-------|
-| `SUPABASE_URL` | Server | Supabase project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server | Service role key (never expose publicly) |
-| `LEADS_API_SECRET` | Server | Shared secret for API auth |
-| `VITE_LEADS_API_SECRET` | Browser (CRM) | Same value as `LEADS_API_SECRET` |
-| `VITE_GOOGLE_CLIENT_ID` | Browser | Google OAuth (existing) |
-
-Redeploy after setting variables.
+| Variable | Projects | Notes |
+|----------|----------|-------|
+| `LEADS_API_SECRET` | Command Core + Digital Weave | Same secret on both |
+| `KV_REST_API_URL` | Command Core | Auto-set by Vercel KV |
+| `KV_REST_API_TOKEN` | Command Core | Auto-set by Vercel KV |
+| `VITE_GOOGLE_CLIENT_ID` | Command Core | Google OAuth |
 
 ## 3. Contact form fields (website → API)
 
@@ -98,10 +98,8 @@ export default async function handler(req, res) {
 
 The CRM page calls:
 
-- `GET /api/leads` — list leads
-- `POST /api/leads` with `channel: "Manual"` — add lead from the UI
-
-Both require the `x-api-key` header (sent automatically via `VITE_LEADS_API_SECRET`).
+- `GET /api/leads` — list leads (same-origin, no API key required)
+- `POST /api/leads?channel=manual` — add lead from the UI
 
 ## 5. Local development
 
@@ -110,7 +108,7 @@ Both require the `x-api-key` header (sent automatically via `VITE_LEADS_API_SECR
 | `npm run dev` | Frontend only (API calls fail unless proxied) |
 | `npm run dev:api` | Full stack with Vercel API routes (`vercel dev`) |
 
-For `dev:api`, install Vercel CLI (`npm i -g vercel`) and add a `.env` file with Supabase + API secrets.
+For `dev:api`, install Vercel CLI (`npm i -g vercel`) and add a `.env` file with KV + API secrets.
 
 ## 6. Test the endpoint
 
@@ -130,8 +128,17 @@ curl -X POST https://core.digitalweave.tech/api/leads \
 
 ```bash
 curl https://core.digitalweave.tech/api/leads \
-  -H "x-api-key: YOUR_SECRET"
+  -H "Origin: https://core.digitalweave.tech"
 ```
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| `502` from `digital-weave.vercel.app/api/contact` | Command Core `/api/leads` is failing upstream. Check Command Core Vercel function logs. |
+| `FUNCTION_INVOCATION_FAILED` on Command Core | Missing `@vercel/kv` package or KV not linked. Link KV storage and redeploy. |
+| `503` + "Vercel KV is not configured" | Link a KV / Upstash Redis database to the Command Core Vercel project. |
+| `401 Unauthorized` on POST | `LEADS_API_SECRET` mismatch between Digital Weave and Command Core. |
 
 ## Field aliases
 

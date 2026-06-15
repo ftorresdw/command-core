@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { leadFromManualInput, leadFromWebsiteInput } from '../lib/lead'
-import { appendLead, readLeads } from './_lib/leadsStore'
+import { appendLead, LeadsStorageError, readLeads } from './_lib/leadsStore'
 import {
   getApiKeyHeader,
   isCrmOrigin,
@@ -10,6 +10,7 @@ import {
 import { parseManualLeadInput, parseWebsiteLeadInput } from './_lib/validate'
 
 const WEBSITE_ORIGINS = new Set([
+  'https://digital-weave.vercel.app',
   'https://digitalweave.tech',
   'https://www.digitalweave.tech',
   'http://localhost:5173',
@@ -44,8 +45,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const leads = await readLeads()
       json(res, 200, { leads })
-    } catch {
-      json(res, 500, { error: 'Failed to load leads.' })
+    } catch (error) {
+      const message =
+        error instanceof LeadsStorageError ? error.message : 'Failed to load leads.'
+      json(res, 503, { error: message })
     }
     return
   }
@@ -70,8 +73,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const lead = leadFromManualInput(parsed.value, existing)
         const saved = await appendLead(lead)
         json(res, 201, { lead: saved })
-      } catch {
-        json(res, 500, { error: 'Failed to save lead.' })
+      } catch (error) {
+        const message =
+          error instanceof LeadsStorageError ? error.message : 'Failed to save lead.'
+        json(res, 503, { error: message })
       }
       return
     }
@@ -94,8 +99,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const lead = leadFromWebsiteInput(parsed.value, existing)
       const saved = await appendLead(lead)
       json(res, 201, { lead: { id: saved.id } })
-    } catch {
-      json(res, 500, { error: 'Failed to save lead.' })
+    } catch (error) {
+      const message =
+        error instanceof LeadsStorageError ? error.message : 'Failed to save lead.'
+      json(res, 503, { error: message })
     }
     return
   }

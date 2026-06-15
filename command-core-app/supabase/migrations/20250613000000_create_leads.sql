@@ -1,14 +1,14 @@
 create table if not exists public.leads (
   id text primary key,
+  name text not null,
+  email text not null default '',
   company text not null default '',
-  contact_name text not null,
-  contact_email text not null default '',
+  service text not null default 'Other',
+  message text not null default '',
+  marketing_opt_in boolean not null default false,
   status text not null default 'New',
-  project_type text not null default 'Other',
   lead_type text not null default 'Inbound',
   channel text not null default 'Website' check (channel in ('Manual', 'Website')),
-  message text,
-  marketing_opt_in boolean not null default false,
   created_at timestamptz not null default now()
 );
 

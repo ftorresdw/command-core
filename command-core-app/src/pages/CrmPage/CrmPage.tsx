@@ -2,12 +2,19 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { createManualLead, fetchLeads } from '../../api/leadsClient'
 import {
   LEAD_TYPE_OPTIONS,
-  PROJECT_TYPE_OPTIONS,
-  STATUS_OPTIONS,
+  SERVICE_OPTIONS,
+  LEAD_STATUS_OPTIONS,
   type Lead,
-  type LeadFormState,
-} from '../../types/lead'
+} from '../../../lib/lead'
 import styles from './CrmPage.module.css'
+
+type LeadFormState = {
+  company: string
+  contact: string
+  status: (typeof LEAD_STATUS_OPTIONS)[number]
+  projectType: (typeof SERVICE_OPTIONS)[number]
+  leadType: (typeof LEAD_TYPE_OPTIONS)[number]
+}
 
 const emptyForm: LeadFormState = {
   company: '',
@@ -142,15 +149,13 @@ export function CrmPage() {
                     <td className={styles.mono}>{lead.id}</td>
                     <td>{lead.company}</td>
                     <td>
-                      <div>{lead.contactName}</div>
-                      {lead.contactEmail && (
-                        <div className={styles.contactEmail}>{lead.contactEmail}</div>
-                      )}
+                      <div>{lead.name}</div>
+                      {lead.email && <div className={styles.contactEmail}>{lead.email}</div>}
                     </td>
                     <td>
                       <span className={styles.pill}>{lead.status}</span>
                     </td>
-                    <td>{lead.projectType}</td>
+                    <td>{lead.service}</td>
                     <td>{lead.leadType}</td>
                     <td>
                       <span
@@ -217,9 +222,11 @@ export function CrmPage() {
                 <select
                   className={styles.input}
                   value={form.status}
-                  onChange={(event) => updateForm('status', event.target.value)}
+                  onChange={(event) =>
+                    updateForm('status', event.target.value as LeadFormState['status'])
+                  }
                 >
-                  {STATUS_OPTIONS.map((option) => (
+                  {LEAD_STATUS_OPTIONS.map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
@@ -232,9 +239,11 @@ export function CrmPage() {
                 <select
                   className={styles.input}
                   value={form.projectType}
-                  onChange={(event) => updateForm('projectType', event.target.value)}
+                  onChange={(event) =>
+                    updateForm('projectType', event.target.value as LeadFormState['projectType'])
+                  }
                 >
-                  {PROJECT_TYPE_OPTIONS.map((option) => (
+                  {SERVICE_OPTIONS.map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
@@ -247,7 +256,9 @@ export function CrmPage() {
                 <select
                   className={styles.input}
                   value={form.leadType}
-                  onChange={(event) => updateForm('leadType', event.target.value)}
+                  onChange={(event) =>
+                    updateForm('leadType', event.target.value as LeadFormState['leadType'])
+                  }
                 >
                   {LEAD_TYPE_OPTIONS.map((option) => (
                     <option key={option} value={option}>

@@ -1,49 +1,37 @@
-import type { Lead, LeadFormState } from '../types/lead'
+import type { Lead } from '../../lib/lead'
+import type { LeadFormState } from '../types/lead'
 
-const apiSecret = import.meta.env.VITE_LEADS_API_SECRET ?? ''
+export async function fetchLeads(): Promise<Lead[]> {
+  const response = await fetch('/api/leads')
 
-function authHeaders(): HeadersInit {
-  if (!apiSecret) return {}
-  return { 'x-api-key': apiSecret }
-}
-
-async function parseResponse<T>(response: Response): Promise<T> {
-  const payload = (await response.json()) as T & { error?: string }
+  const payload = (await response.json()) as { leads?: Lead[]; error?: string }
   if (!response.ok) {
     throw new Error(payload.error ?? `Request failed (${response.status})`)
   }
-  return payload
-}
 
-export async function fetchLeads(): Promise<Lead[]> {
-  const response = await fetch('/api/leads', {
-    headers: {
-      ...authHeaders(),
-    },
-  })
-
-  const payload = await parseResponse<{ leads: Lead[] }>(response)
-  return payload.leads
+  return payload.leads ?? []
 }
 
 export async function createManualLead(form: LeadFormState): Promise<Lead> {
-  const response = await fetch('/api/leads', {
+  const response = await fetch('/api/leads?channel=manual', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...authHeaders(),
     },
     body: JSON.stringify({
       name: form.contact,
-      email: '',
       company: form.company,
+      service: form.projectType,
       status: form.status,
-      projectType: form.projectType,
       leadType: form.leadType,
-      channel: 'Manual',
+      marketingOptIn: false,
     }),
   })
 
-  const payload = await parseResponse<{ lead: Lead }>(response)
+  const payload = (await response.json()) as { lead?: Lead; error?: string }
+  if (!response.ok || !payload.lead) {
+    throw new Error(payload.error ?? `Request failed (${response.status})`)
+  }
+
   return payload.lead
 }

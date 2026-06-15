@@ -19,9 +19,13 @@ export function parseWebsiteLeadInput(body: unknown):
   if (!email) return { ok: false, error: 'email is required.' }
   if (!EMAIL_PATTERN.test(email)) return { ok: false, error: 'email is invalid.' }
   if (!message) return { ok: false, error: 'message is required.' }
-  if (typeof record.marketingOptIn !== 'boolean') {
-    return { ok: false, error: 'marketingOptIn must be a boolean.' }
-  }
+
+  const marketingOptIn =
+    typeof record.marketingOptIn === 'boolean'
+      ? record.marketingOptIn
+      : record.marketingOptIn === 'true' ||
+        record.marketingOptIn === '1' ||
+        record.marketingOptIn === 'on'
 
   return {
     ok: true,
@@ -31,7 +35,7 @@ export function parseWebsiteLeadInput(body: unknown):
       company: typeof record.company === 'string' ? record.company : '',
       service: typeof record.service === 'string' ? record.service : '',
       message,
-      marketingOptIn: record.marketingOptIn,
+      marketingOptIn,
     },
   }
 }
