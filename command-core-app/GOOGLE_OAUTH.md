@@ -90,6 +90,24 @@ For stricter control, validate the email domain in `src/auth/AuthContext.tsx` af
 | Button does not appear | Ensure `VITE_GOOGLE_CLIENT_ID` is set and the app was rebuilt after adding it. |
 | Login skipped locally | Expected — auth is disabled on `localhost` / `127.0.0.1`. |
 | `Access blocked` | Complete the OAuth consent screen or add the user as a test user. |
+| `Error 401: invalid_client` / OAuth client was not found | Wrong or missing `VITE_GOOGLE_CLIENT_ID`. Use the **Client ID** (ends in `.apps.googleusercontent.com`), not the client secret. Set it in your host **before** building, then redeploy. |
+
+### Fixing `Error 401: invalid_client`
+
+This almost always means the deployed bundle has a bad client ID:
+
+1. Open [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials).
+2. Under **OAuth 2.0 Client IDs**, open your **Web application** client.
+3. Copy **Client ID** only — it looks like `123456789-abc.apps.googleusercontent.com`.
+4. In your hosting dashboard (Vercel, Netlify, Cloudflare Pages, etc.), set:
+   ```env
+   VITE_GOOGLE_CLIENT_ID=123456789-abc.apps.googleusercontent.com
+   ```
+   No quotes, no spaces, no trailing slash.
+5. **Redeploy** (new build required — Vite bakes this in at compile time).
+6. Confirm **Authorized JavaScript origins** includes `https://core.digitalweave.tech`.
+
+**Common mistakes:** using the client secret, leaving the `.env.example` placeholder, setting the env var after build without redeploying, or creating an Android/iOS client instead of **Web application**.
 
 ## Related files
 

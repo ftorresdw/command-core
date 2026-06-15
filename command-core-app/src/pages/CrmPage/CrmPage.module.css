@@ -48,6 +48,27 @@
 }
 .cardTitle{font-weight:700; margin-bottom:10px; opacity:.92}
 
+.errorBanner{
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid color-mix(in srgb, var(--destructive) 45%, transparent);
+  background:color-mix(in srgb, var(--destructive) 12%, transparent);
+  color:var(--light-text);
+  font-size:13px;
+}
+
+.emptyState{
+  text-align:center;
+  opacity:.7;
+  padding:18px 10px !important;
+}
+
+.contactEmail{
+  font-size:11px;
+  color:var(--soft-gray);
+  margin-top:2px;
+}
+
 .tableWrap{overflow:auto}
 .table{
   width:100%;

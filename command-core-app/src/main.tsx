@@ -5,11 +5,12 @@ import App from './App.tsx'
 import './index.css'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
+import { getGoogleClientId, isGoogleClientIdConfigured } from './auth/googleAuth'
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
+const googleClientId = getGoogleClientId()
 
 function AppProviders(props: { children: React.ReactNode }) {
-  if (!googleClientId) {
+  if (!isGoogleClientIdConfigured()) {
     return <AuthProvider>{props.children}</AuthProvider>
   }
 

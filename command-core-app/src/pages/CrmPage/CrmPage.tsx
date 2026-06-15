@@ -1,80 +1,54 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { createManualLead, fetchLeads } from '../../api/leadsClient'
+import {
+  LEAD_TYPE_OPTIONS,
+  PROJECT_TYPE_OPTIONS,
+  STATUS_OPTIONS,
+  type Lead,
+  type LeadFormState,
+} from '../../types/lead'
 import styles from './CrmPage.module.css'
-
-type LeadChannel = 'Manual' | 'Website'
-
-type Lead = {
-  id: string
-  company: string
-  contact: string
-  status: string
-  projectType: string
-  leadType: string
-  channel: LeadChannel
-}
-
-type LeadFormState = {
-  company: string
-  contact: string
-  status: string
-  projectType: string
-  leadType: string
-}
-
-const STATUS_OPTIONS = ['New', 'Contacted', 'Qualified', 'Proposal', 'Closed']
-const PROJECT_TYPE_OPTIONS = ['Website', 'IT Support', 'Consulting', 'Managed Services', 'Other']
-const LEAD_TYPE_OPTIONS = ['Inbound', 'Outbound', 'Referral', 'Partner', 'Other']
-
-const initialLeads: Lead[] = [
-  {
-    id: 'L-1001',
-    company: 'Acme Co',
-    contact: 'Jamie Rivera',
-    status: 'New',
-    projectType: 'Website',
-    leadType: 'Inbound',
-    channel: 'Website',
-  },
-  {
-    id: 'L-1002',
-    company: 'Northwind',
-    contact: 'Sam Lee',
-    status: 'Contacted',
-    projectType: 'IT Support',
-    leadType: 'Referral',
-    channel: 'Website',
-  },
-  {
-    id: 'L-1003',
-    company: 'Blue Sky Dental',
-    contact: 'Taylor Morgan',
-    status: 'Qualified',
-    projectType: 'Managed Services',
-    leadType: 'Inbound',
-    channel: 'Manual',
-  },
-]
 
 const emptyForm: LeadFormState = {
   company: '',
   contact: '',
   status: 'New',
-  projectType: 'Website',
+  projectType: 'Website Development',
   leadType: 'Inbound',
 }
 
-function nextLeadId(leads: Lead[]) {
-  const max = leads.reduce((current, lead) => {
-    const numeric = Number(lead.id.replace('L-', ''))
-    return Number.isFinite(numeric) ? Math.max(current, numeric) : current
-  }, 1000)
-  return `L-${max + 1}`
-}
-
 export function CrmPage() {
-  const [leads, setLeads] = useState(initialLeads)
+  const [leads, setLeads] = useState<Lead[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showAddLead, setShowAddLead] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<LeadFormState>(emptyForm)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadLeads() {
+      setLoading(true)
+      setError(null)
+
+      try {
+        const nextLeads = await fetchLeads()
+        if (!cancelled) setLeads(nextLeads)
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(loadError instanceof Error ? loadError.message : 'Failed to load leads')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    void loadLeads()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   function updateForm<K extends keyof LeadFormState>(key: K, value: LeadFormState[K]) {
     setForm((current) => ({ ...current, [key]: value }))
@@ -90,25 +64,25 @@ export function CrmPage() {
     setForm(emptyForm)
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const company = form.company.trim()
     const contact = form.contact.trim()
     if (!company || !contact) return
 
-    const newLead: Lead = {
-      id: nextLeadId(leads),
-      company,
-      contact,
-      status: form.status,
-      projectType: form.projectType,
-      leadType: form.leadType,
-      channel: 'Manual',
-    }
+    setSaving(true)
+    setError(null)
 
-    setLeads((current) => [newLead, ...current])
-    closeAddLead()
+    try {
+      const lead = await createManualLead({ ...form, company, contact })
+      setLeads((current) => [lead, ...current])
+      closeAddLead()
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Failed to save lead')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -117,7 +91,7 @@ export function CrmPage() {
         <div>
           <div className={styles.title}>CRM</div>
           <div className={styles.subtitle}>
-            Leads will be ingested via API from the Digital Weave website.
+            Leads are ingested from the Digital Weave website contact form and manual entry.
           </div>
         </div>
         <div className={styles.actions}>
@@ -129,6 +103,8 @@ export function CrmPage() {
           </button>
         </div>
       </div>
+
+      {error && <div className={styles.errorBanner}>{error}</div>}
 
       <section className={styles.card}>
         <div className={styles.cardTitle}>Leads</div>
@@ -146,27 +122,47 @@ export function CrmPage() {
               </tr>
             </thead>
             <tbody>
-              {leads.map((lead) => (
-                <tr key={lead.id}>
-                  <td className={styles.mono}>{lead.id}</td>
-                  <td>{lead.company}</td>
-                  <td>{lead.contact}</td>
-                  <td>
-                    <span className={styles.pill}>{lead.status}</span>
-                  </td>
-                  <td>{lead.projectType}</td>
-                  <td>{lead.leadType}</td>
-                  <td>
-                    <span
-                      className={`${styles.channelPill} ${
-                        lead.channel === 'Website' ? styles.channelWebsite : styles.channelManual
-                      }`}
-                    >
-                      {lead.channel}
-                    </span>
+              {loading && (
+                <tr>
+                  <td colSpan={7} className={styles.emptyState}>
+                    Loading leads…
                   </td>
                 </tr>
-              ))}
+              )}
+              {!loading && leads.length === 0 && (
+                <tr>
+                  <td colSpan={7} className={styles.emptyState}>
+                    No leads yet. Submissions from the website will appear here.
+                  </td>
+                </tr>
+              )}
+              {!loading &&
+                leads.map((lead) => (
+                  <tr key={lead.id}>
+                    <td className={styles.mono}>{lead.id}</td>
+                    <td>{lead.company}</td>
+                    <td>
+                      <div>{lead.contactName}</div>
+                      {lead.contactEmail && (
+                        <div className={styles.contactEmail}>{lead.contactEmail}</div>
+                      )}
+                    </td>
+                    <td>
+                      <span className={styles.pill}>{lead.status}</span>
+                    </td>
+                    <td>{lead.projectType}</td>
+                    <td>{lead.leadType}</td>
+                    <td>
+                      <span
+                        className={`${styles.channelPill} ${
+                          lead.channel === 'Website' ? styles.channelWebsite : styles.channelManual
+                        }`}
+                      >
+                        {lead.channel}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -269,8 +265,8 @@ export function CrmPage() {
                 <button className={styles.ghostButton} type="button" onClick={closeAddLead}>
                   Cancel
                 </button>
-                <button className={styles.primaryButton} type="submit">
-                  Save Lead
+                <button className={styles.primaryButton} type="submit" disabled={saving}>
+                  {saving ? 'Saving…' : 'Save Lead'}
                 </button>
               </div>
             </form>
