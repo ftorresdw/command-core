@@ -1,0 +1,23 @@
+.loading{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  background:var(--deep-navy);
+  color:var(--light-text);
+}
+
+.spinner{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:2px solid color-mix(in srgb, var(--accent-orange) 25%, transparent);
+  border-top-color:var(--accent-orange);
+  animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}

@@ -1,0 +1,70 @@
+.page{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background-color:var(--deep-navy);
+  background-image:
+    radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--accent-orange) 14%, transparent), transparent 40%),
+    radial-gradient(circle at 15% 85%, color-mix(in srgb, var(--ai-cyan) 10%, transparent), transparent 35%),
+    linear-gradient(var(--weave-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--weave-line) 1px, transparent 1px);
+  background-size:auto, auto, 8px 8px, 8px 8px;
+}
+
+.card{
+  width:100%;
+  max-width:460px;
+  padding:36px 32px;
+  border-radius:18px;
+  border:1px solid color-mix(in srgb, var(--accent-orange) 22%, var(--border));
+  background:var(--card-bg);
+  text-align:center;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--ai-cyan) 8%, transparent),
+    0 24px 60px color-mix(in srgb, #000 55%, transparent);
+}
+
+.logo{
+  margin-bottom:8px;
+}
+
+.description{
+  margin:20px 0 24px;
+  font-size:14px;
+  line-height:1.5;
+  color:var(--soft-gray);
+}
+
+.googleButtonWrap{
+  display:flex;
+  justify-content:center;
+}
+
+.setupNote{
+  padding:14px;
+  border-radius:12px;
+  border:1px solid color-mix(in srgb, var(--ai-cyan) 22%, var(--border));
+  background:color-mix(in srgb, var(--ai-cyan) 6%, var(--secondary-navy));
+  text-align:left;
+}
+
+.setupNote p{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color:var(--light-text);
+}
+
+.setupHint{
+  margin-top:10px !important;
+  color:var(--soft-gray) !important;
+  font-size:12px !important;
+}
+
+.setupNote code{
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size:12px;
+  color:var(--accent-orange);
+}
