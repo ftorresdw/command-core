@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import type { Lead } from '../../lib/lead'
+import type { Lead } from './lead.js'
 
 type LeadRow = {
   id: string

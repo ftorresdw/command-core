@@ -1,5 +1,5 @@
-import type { ManualLeadInput, WebsiteLeadInput } from '../../lib/lead'
-import { LEAD_STATUS_OPTIONS, LEAD_TYPE_OPTIONS } from '../../lib/lead'
+import type { ManualLeadInput, WebsiteLeadInput } from './lead.js'
+import { LEAD_STATUS_OPTIONS, LEAD_TYPE_OPTIONS } from './lead.js'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
