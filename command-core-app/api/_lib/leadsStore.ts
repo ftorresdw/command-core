@@ -54,15 +54,31 @@ function mapLead(lead: Lead): LeadRow {
   }
 }
 
-function getSupabase(): SupabaseClient {
-  const url = process.env.SUPABASE_URL?.trim()
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+function getSupabaseConfig(): { url: string; key: string } {
+  const url = (process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL)?.trim() ?? ''
+  const key = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_SECRET_KEY ??
+    process.env.SUPABASE_SERVICE_KEY
+  )?.trim() ?? ''
 
   if (!url || !key) {
+    const missing = [
+      !url ? 'SUPABASE_URL' : null,
+      !key ? 'SUPABASE_SERVICE_ROLE_KEY' : null,
+    ].filter(Boolean)
+
     throw new LeadsStorageError(
-      'Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel.',
+      `Supabase is not configured. Missing in Vercel: ${missing.join(', ')}. ` +
+        'Add them under Settings → Environment Variables (Production), then redeploy.',
     )
   }
+
+  return { url, key }
+}
+
+function getSupabase(): SupabaseClient {
+  const { url, key } = getSupabaseConfig()
 
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
