@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { LEAD_STATUS_OPTIONS } from './_lib/lead.js'
-import { deleteLead, LeadsStorageError, updateLeadStatus } from './_lib/leadsStore.js'
-import { isCrmOrigin, json } from './_lib/http.js'
+import { LEAD_STATUS_OPTIONS } from '../_lib/lead.js'
+import { deleteLead, LeadsStorageError, updateLeadStatus } from '../_lib/leadsStore.js'
+import { isCrmOrigin, json } from '../_lib/http.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
