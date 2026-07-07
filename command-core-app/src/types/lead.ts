@@ -41,7 +41,7 @@ export type CreateManualLeadPayload = {
   leadType: string
 }
 
-export const STATUS_OPTIONS = ['New', 'Contacted', 'Qualified', 'Proposal', 'Closed'] as const
+export const STATUS_OPTIONS = ['New', 'Contacted', 'Negotiation'] as const
 
 export const PROJECT_TYPE_OPTIONS = [
   'AI Consulting & Implementation',

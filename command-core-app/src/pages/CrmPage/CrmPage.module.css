@@ -104,6 +104,44 @@
   font-weight:700;
 }
 
+.statusSelect{
+  height:30px;
+  min-width:120px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:color-mix(in srgb, var(--background) 70%, transparent);
+  color:var(--foreground);
+  padding:0 8px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.statusSelect:focus{
+  border-color:color-mix(in srgb, var(--accent-orange) 55%, transparent);
+  outline:none;
+}
+
+.deleteButton{
+  height:30px;
+  padding:0 10px;
+  border-radius:8px;
+  border:1px solid color-mix(in srgb, var(--destructive) 45%, transparent);
+  background:color-mix(in srgb, var(--destructive) 10%, transparent);
+  color:var(--light-text);
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.deleteButton:hover:not(:disabled){
+  background:color-mix(in srgb, var(--destructive) 18%, transparent);
+}
+
+.deleteButton:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
 .channelPill{
   display:inline-flex;
   align-items:center;

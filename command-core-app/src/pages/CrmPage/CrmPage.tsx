@@ -1,17 +1,23 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { createManualLead, fetchLeads } from '../../api/leadsClient'
+import {
+  createManualLead,
+  deleteLead,
+  fetchLeads,
+  updateLeadStatus,
+} from '../../api/leadsClient'
 import {
   LEAD_TYPE_OPTIONS,
   SERVICE_OPTIONS,
   LEAD_STATUS_OPTIONS,
   type Lead,
+  type LeadStatus,
 } from '../../../lib/lead'
 import styles from './CrmPage.module.css'
 
 type LeadFormState = {
   company: string
   contact: string
-  status: (typeof LEAD_STATUS_OPTIONS)[number]
+  status: LeadStatus
   projectType: (typeof SERVICE_OPTIONS)[number]
   leadType: (typeof LEAD_TYPE_OPTIONS)[number]
 }
@@ -24,12 +30,18 @@ const emptyForm: LeadFormState = {
   leadType: 'Inbound',
 }
 
+function isLeadStatus(value: string): value is LeadStatus {
+  return LEAD_STATUS_OPTIONS.includes(value as LeadStatus)
+}
+
 export function CrmPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showAddLead, setShowAddLead] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [form, setForm] = useState<LeadFormState>(emptyForm)
 
   useEffect(() => {
@@ -92,6 +104,39 @@ export function CrmPage() {
     }
   }
 
+  async function handleStatusChange(id: string, status: string) {
+    if (!isLeadStatus(status)) return
+
+    setUpdatingId(id)
+    setError(null)
+
+    try {
+      const updated = await updateLeadStatus(id, status)
+      setLeads((current) => current.map((lead) => (lead.id === id ? updated : lead)))
+    } catch (updateError) {
+      setError(updateError instanceof Error ? updateError.message : 'Failed to update status')
+    } finally {
+      setUpdatingId(null)
+    }
+  }
+
+  async function handleDelete(id: string, name: string) {
+    const confirmed = window.confirm(`Delete lead ${id} (${name})? This cannot be undone.`)
+    if (!confirmed) return
+
+    setDeletingId(id)
+    setError(null)
+
+    try {
+      await deleteLead(id)
+      setLeads((current) => current.filter((lead) => lead.id !== id))
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : 'Failed to delete lead')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
@@ -126,19 +171,20 @@ export function CrmPage() {
                 <th>Type of Project</th>
                 <th>Type of Lead</th>
                 <th>Channel</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={7} className={styles.emptyState}>
+                  <td colSpan={8} className={styles.emptyState}>
                     Loading leads…
                   </td>
                 </tr>
               )}
               {!loading && leads.length === 0 && (
                 <tr>
-                  <td colSpan={7} className={styles.emptyState}>
+                  <td colSpan={8} className={styles.emptyState}>
                     No leads yet. Submissions from the website will appear here.
                   </td>
                 </tr>
@@ -153,7 +199,19 @@ export function CrmPage() {
                       {lead.email && <div className={styles.contactEmail}>{lead.email}</div>}
                     </td>
                     <td>
-                      <span className={styles.pill}>{lead.status}</span>
+                      <select
+                        className={styles.statusSelect}
+                        value={isLeadStatus(lead.status) ? lead.status : 'New'}
+                        disabled={updatingId === lead.id}
+                        onChange={(event) => void handleStatusChange(lead.id, event.target.value)}
+                        aria-label={`Status for ${lead.name}`}
+                      >
+                        {LEAD_STATUS_OPTIONS.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td>{lead.service}</td>
                     <td>{lead.leadType}</td>
@@ -165,6 +223,16 @@ export function CrmPage() {
                       >
                         {lead.channel}
                       </span>
+                    </td>
+                    <td>
+                      <button
+                        className={styles.deleteButton}
+                        type="button"
+                        disabled={deletingId === lead.id}
+                        onClick={() => void handleDelete(lead.id, lead.name)}
+                      >
+                        {deletingId === lead.id ? 'Deleting…' : 'Delete'}
+                      </button>
                     </td>
                   </tr>
                 ))}

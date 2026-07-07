@@ -112,3 +112,34 @@ export async function appendLead(lead: Lead): Promise<Lead> {
 
   return mapRow(data as LeadRow)
 }
+
+export async function updateLeadStatus(id: string, status: Lead['status']): Promise<Lead> {
+  const supabase = getSupabase()
+
+  const { data, error } = await supabase
+    .from('leads')
+    .update({ status })
+    .eq('id', id)
+    .select('*')
+    .single()
+
+  if (error) {
+    throw new LeadsStorageError(error.message)
+  }
+
+  if (!data) {
+    throw new LeadsStorageError('Lead not found.')
+  }
+
+  return mapRow(data as LeadRow)
+}
+
+export async function deleteLead(id: string): Promise<void> {
+  const supabase = getSupabase()
+
+  const { error } = await supabase.from('leads').delete().eq('id', id)
+
+  if (error) {
+    throw new LeadsStorageError(error.message)
+  }
+}

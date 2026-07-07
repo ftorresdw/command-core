@@ -7,6 +7,7 @@ import {
   json,
   setCorsHeaders,
 } from './_lib/http.js'
+import { notifyNewWebsiteLead } from './_lib/notifyLead.js'
 import { parseManualLeadInput, parseWebsiteLeadInput } from './_lib/validate.js'
 
 const WEBSITE_ORIGINS = new Set([
@@ -99,6 +100,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const existing = await readLeads()
         const lead = leadFromWebsiteInput(parsed.value, existing)
         const saved = await appendLead(lead)
+        void notifyNewWebsiteLead(saved)
         json(res, 201, { lead: { id: saved.id } })
       } catch (error) {
         const message =

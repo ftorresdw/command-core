@@ -1,6 +1,6 @@
 export type LeadChannel = 'Manual' | 'Website'
 
-export type LeadStatus = 'New' | 'Contacted' | 'Qualified' | 'Proposal' | 'Closed'
+export type LeadStatus = 'New' | 'Contacted' | 'Negotiation'
 
 export type Lead = {
   id: string
@@ -38,13 +38,7 @@ export type ManualLeadInput = {
   marketingOptIn?: boolean
 }
 
-export const LEAD_STATUS_OPTIONS: LeadStatus[] = [
-  'New',
-  'Contacted',
-  'Qualified',
-  'Proposal',
-  'Closed',
-]
+export const LEAD_STATUS_OPTIONS: LeadStatus[] = ['New', 'Contacted', 'Negotiation']
 
 export const SERVICE_OPTIONS = [
   'AI Consulting & Implementation',
