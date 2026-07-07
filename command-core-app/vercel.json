@@ -2,10 +2,13 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "functions": {
-    "api/**/*.ts": {
+    "api/leads/index.ts": {
       "includeFiles": "api/_lib/**"
     },
-    "api/leads/**/*.ts": {
+    "api/leads/[id].ts": {
+      "includeFiles": "api/_lib/**"
+    },
+    "api/health.ts": {
       "includeFiles": "api/_lib/**"
     }
   },

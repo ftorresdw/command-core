@@ -1,14 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { leadFromManualInput, leadFromWebsiteInput } from './_lib/lead.js'
-import { appendLead, LeadsStorageError, readLeads } from './_lib/leadsStore.js'
+import { leadFromManualInput, leadFromWebsiteInput } from '../_lib/lead.js'
+import { appendLead, LeadsStorageError, readLeads } from '../_lib/leadsStore.js'
 import {
   getApiKeyHeader,
   isCrmOrigin,
   json,
   setCorsHeaders,
-} from './_lib/http.js'
-import { notifyNewWebsiteLead } from './_lib/notifyLead.js'
-import { parseManualLeadInput, parseWebsiteLeadInput } from './_lib/validate.js'
+} from '../_lib/http.js'
+import { notifyNewWebsiteLead } from '../_lib/notifyLead.js'
+import { parseManualLeadInput, parseWebsiteLeadInput } from '../_lib/validate.js'
 
 const WEBSITE_ORIGINS = new Set([
   'https://digital-weave.vercel.app',
